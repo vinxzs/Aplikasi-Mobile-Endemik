@@ -1,0 +1,21 @@
+name: endemik_db
+description: Aplikasi database burung endemik
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.0.0+4    # Untuk database lokal SQLite
+  path_provider: ^2.0.0 # Untuk mengakses path penyimpanan Android
+  dio: ^4.0.0          # Untuk mengambil data dari API
+  path: ^1.8.0         # Untuk manipulasi path
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
