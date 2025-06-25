@@ -1,12 +1,8 @@
+// lib/service/endemik_service.dart
+
 import 'package:dio/dio.dart';
 import '../model/endemik.dart';
 import '../helper/database_helper.dart';
-
-/*
-  service ini dibentuk karena prosesnya yang akan memblokir memory UI
-  sehingga perlu dipisah untuk tiap proses "mengambil data"
-  yang pastinya membutuhkan waktu lama
-*/
 
 class EndemikService {
   final Dio _dio = Dio();
@@ -21,7 +17,6 @@ class EndemikService {
     final dbHelper = DatabaseHelper();
 
     try {
-      // Cek apakah data sudah ada di database
       bool dataExists = await isDataAvailable();
       if (dataExists) {
         print("Data sudah ada di database, tidak perlu mengambil dari API.");
@@ -29,7 +24,6 @@ class EndemikService {
         return oldData;
       }
 
-      // jika belum, maka tarik dari API
       final response = await _dio.get('https://hendroprwk08.github.io/data_endemik/endemik.json');
       final List<dynamic> data = response.data;
 
@@ -37,12 +31,12 @@ class EndemikService {
         Endemik model = Endemik(
           id: json["id"],
           nama: json["nama"],
-          namaLatin: json["nama_latin"], // Perbaiki typo dari namaJatin ke namaLatin
+          namaLatin: json["nama_latin"],
           deskripsi: json["deskripsi"],
           asal: json["asal"],
           foto: json["foto"],
           status: json["status"],
-          isFavorit: json["is_favorit"] ?? "false", // Perbaiki dari is_favorit ke isFavorit
+          isFavorit: json["is_favorit"] ?? "false", // Pastikan ini string
         );
 
         await dbHelper.insert(model);
@@ -51,18 +45,31 @@ class EndemikService {
       return data.map((json) => Endemik.fromJson(json)).toList();
     } catch (e) {
       print(e);
+      // Jika ada error (misal: tidak ada koneksi internet saat pertama kali),
+      // coba ambil dari database lokal (jika ada) atau kembalikan list kosong.
+      final List<Endemik> localData = await dbHelper.getAll();
+      if (localData.isNotEmpty) {
+        print("Error fetching from API, loading local data.");
+        return localData;
+      }
       return [];
     }
   }
 
   Future<List<Endemik>> getFavoritData() async {
-    try {
-      final db = DatabaseHelper();
-      final List<Endemik> data = await db.getFavoritAll();
-      return data;
-    } catch (e) {
-      print(e);
-      return [];
-    }
+    final dbHelper = DatabaseHelper();
+    return await dbHelper.getFavoritAll();
+  }
+
+  // Tambahkan method untuk setFavorit
+  Future<void> setFavorit(String id, String isFavorit) async {
+    final dbHelper = DatabaseHelper();
+    await dbHelper.setFavorit(id, isFavorit);
+  }
+
+  // Tambahkan method untuk deleteFavoritAll
+  Future<void> deleteFavoritAll() async {
+    final dbHelper = DatabaseHelper();
+    await dbHelper.deleteFavoritAll();
   }
 }

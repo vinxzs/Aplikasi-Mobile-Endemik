@@ -6,8 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.latihanuas"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.latihanuas" // Pastikan namespace ini sudah benar
+    compileSdk = flutter.compileSdkVersion // Gunakan ini, JANGAN hardcode 34 kecuali Anda tahu apa yang Anda lakukan
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -20,35 +20,24 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.latihanuas"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Ini adalah ID aplikasi utama Anda. Pilih salah satu yang ingin Anda gunakan.
+        // Contoh: Jika Anda ingin menggunakan "com.example.latihanuas_android"
+        applicationId = "com.example.latihanuas_android" // Atau "com.example.latihanuas" jika itu yang Anda inginkan
+
+        minSdk = flutter.minSdkVersion // Gunakan ini, JANGAN hardcode 21 kecuali diperlukan
+        targetSdk = flutter.targetSdkVersion // Gunakan ini, JANGAN hardcode 34 kecuali diperlukan
+
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
-android {
-    compileSdkVersion 34 // atau versi terbaru yang disarankan Flutter Doctor
 
-    defaultConfig {
-        applicationId "com.example.latihanuas_android"
-        minSdkVersion 21 // atau sesuai kebutuhan
-        targetSdkVersion 34
-        ...
-    }
-    ...
-}
 flutter {
     source = "../.."
 }

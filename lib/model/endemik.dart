@@ -1,12 +1,12 @@
 class Endemik {
-  final String id;
-  final String nama;
-  final String namaLatin;
-  final String deskripsi;
-  final String asal;
-  final String foto;
-  final String status;
-  final String isFavorit;
+  String id;
+  String nama;
+  String namaLatin;
+  String deskripsi;
+  String asal;
+  String foto;
+  String status;
+  String isFavorit; // Menggunakan String ("true" / "false") sesuai DB
 
   Endemik({
     required this.id,
@@ -15,39 +15,11 @@ class Endemik {
     required this.deskripsi,
     required this.asal,
     required this.foto,
-    required this.status,
-    required this.isFavorit,
+    this.status = '', // Memberikan nilai default kosong jika tidak ada dari JSON/Map
+    this.isFavorit = "false", // Default false
   });
 
-  // Konversi dari Map ke Object (untuk database)
-  factory Endemik.fromMap(Map<String, dynamic> map) {
-    return Endemik(
-      id: map['id'],
-      nama: map['nama'],
-      namaLatin: map['nama_latin'],
-      deskripsi: map['deskripsi'],
-      asal: map['asal'],
-      foto: map['foto'],
-      status: map['status'],
-      isFavorit: map['is_favorit'],
-    );
-  }
-
-  // Konversi dari JSON ke Object (untuk API)
-  factory Endemik.fromJson(Map<String, dynamic> json) {
-    return Endemik(
-      id: json['id'],
-      nama: json['nama'],
-      namaLatin: json['nama_latin'],
-      deskripsi: json['deskripsi'],
-      asal: json['asal'],
-      foto: json['foto'],
-      status: json['status'],
-      isFavorit: json['is_favorit'] ?? 'false',
-    );
-  }
-
-  // Konversi Object ke Map (untuk menyimpan ke database)
+  // Convert Endemik object to Map (for database insertion)
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -59,5 +31,33 @@ class Endemik {
       'status': status,
       'is_favorit': isFavorit,
     };
+  }
+
+  // Convert Map to Endemik object (for database retrieval)
+  factory Endemik.fromMap(Map<String, dynamic> map) {
+    return Endemik(
+      id: map['id'] as String,
+      nama: map['nama'] as String,
+      namaLatin: map['nama_latin'] as String,
+      deskripsi: map['deskripsi'] as String,
+      asal: map['asal'] as String,
+      foto: map['foto'] as String,
+      status: map['status'] as String? ?? '', // Handle null by providing default
+      isFavorit: map['is_favorit'] as String? ?? "false", // Handle null by providing default
+    );
+  }
+
+  // Convert JSON to Endemik object (for API fetching)
+  factory Endemik.fromJson(Map<String, dynamic> json) {
+    return Endemik(
+      id: json['id'] as String,
+      nama: json['nama'] as String,
+      namaLatin: json['nama_latin'] as String,
+      deskripsi: json['deskripsi'] as String,
+      asal: json['asal'] as String,
+      foto: json['foto'] as String,
+      status: json['status'] as String? ?? '',
+      isFavorit: json['is_favorit'] as String? ?? "false",
+    );
   }
 }

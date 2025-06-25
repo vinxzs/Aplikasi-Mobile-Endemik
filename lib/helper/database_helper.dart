@@ -1,11 +1,9 @@
+// lib/helper/database_helper.dart
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import '../model/endemik.dart';
-
-/*
-  operasi basis data berada pada file ini
-*/
 
 class DatabaseHelper {
   static const _databaseName = 'my_database.db';
@@ -28,25 +26,21 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  static late Database _database;
+  static Database? _database; // Mengubah dari 'late' menjadi nullable
 
   Future<Database> get database async {
+    if (_database != null) return _database!;
     _database = await _initDatabase();
-    return _database;
+    return _database!;
   }
 
-  Future _initDatabase() async {
-    final databasesPath = await
-    getApplicationDocumentsDirectory();
+  Future<Database> _initDatabase() async {
+    final databasesPath = await getApplicationDocumentsDirectory();
     final path = join(databasesPath.path, _databaseName);
-    return await openDatabase(path, version: _databaseVersion,
-        onCreate: _onCreate);
+    return await openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
   }
 
-  // membuat tabel
   Future _onCreate(Database db, int version) async {
-    // _columnId bukan integer dan bukan auto increment
-    // _columnIsFavorit
     await db.execute('''
     CREATE TABLE $_tableName (
     $_columnId TEXT PRIMARY KEY,
@@ -60,14 +54,11 @@ class DatabaseHelper {
     ''');
   }
 
-  // menyimpan data
   Future<int> insert(Endemik object) async {
     final db = await database;
-
-    return await db.insert(_tableName, object.toMap());
+    return await db.insert(_tableName, object.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // mengambil seluruh data
   Future<List<Endemik>> getAll() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(_tableName);
@@ -77,21 +68,16 @@ class DatabaseHelper {
     });
   }
 
-  // menandai atau menghapus data sebagai favorit
   Future<int> setFavorit(String id, String isFavorit) async {
     final db = await database;
-
-    // Update hanya kolom favorit
     return await db.update(
       _tableName,
-      { _columnIsFavorit: isFavorit },
+      {_columnIsFavorit: isFavorit},
       where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  // mengambil data yang ditandai sebagai favorit
-  // is_favorit = true
   Future<List<Endemik>> getFavoritAll() async {
     final db = await database;
 
@@ -104,7 +90,6 @@ class DatabaseHelper {
     return maps.map((map) => Endemik.fromMap(map)).toList();
   }
 
-  // menampilkan data berdasarkan ID
   Future<Endemik?> getById(String id) async {
     final db = await database;
 
@@ -121,32 +106,15 @@ class DatabaseHelper {
     return Endemik.fromMap(maps.first);
   }
 
-  // -- tidak digunakan --
-  // mengubah data endemik
-  Future<int> updateEndemik(Endemik object) async {
-    final db = await database;
-    return await db.update(_tableName, object.toMap(), where:
-    '$_columnId = ?', whereArgs: [object.id]);
-  }
-
-  // mengubah seluruh isi kolom is_favorit menjadi false
   Future<int> deleteFavoritAll() async {
     final db = await database;
+    // Perbaikan: Pastikan nilai yang diupdate adalah STRING "false"
     return await db.update(
       _tableName,
-      { _columnIsFavorit: false },
+      {_columnIsFavorit: "false"}, // <<< PASTIKAN INI ADALAH STRING "false"
     );
   }
 
-  // -- tidak digunakan --
-  // menghapus data
-  Future<int> delete(String id) async {
-    final db = await database;
-    return await db.delete(_tableName, where: '$_columnId = ?',
-        whereArgs: [id]);
-  }
-
-  // menghitung jumlah data dalam tabel
   Future<int> count() async {
     final db = await database;
     var result = await db.rawQuery('SELECT COUNT(*) FROM $_tableName');
